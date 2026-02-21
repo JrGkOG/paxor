@@ -7,8 +7,8 @@ use anyhow::Result;
 
 use crate::types::RaftMessage;
 
-pub async fn send_message(stream: &mut TcpStream,msg:RaftMessage)-> Result<()>{
-    let serialized_data=bincode::serialize(msg)?;
+pub async fn send_message(stream: &mut TcpStream,msg:&RaftMessage)-> Result<()>{
+    let serialized_data=wincode::serialize(msg)?;
 
     let len = serialized_data.len() as u64;
 
@@ -26,7 +26,7 @@ pub async fn read_message(stream: &mut TcpStream)-> Result<RaftMessage>{
     
     stream.read_exact(&mut buffer).await?;
 
-    let msg: RaftmEssage = bincode::deserialize(&buffer)?;
+    let msg: RaftMessage = wincode::deserialize(&buffer)?;
 
     Ok(msg)
 }
