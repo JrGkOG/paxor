@@ -1,5 +1,5 @@
 
-#Paxor
+# Paxor [work in prog] 
 
 Paxor is a distributed, replicated key-value database built from scratch to explore consensus, durability, and fault tolerance.
 
