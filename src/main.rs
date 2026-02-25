@@ -2,11 +2,16 @@ use std::env;
 
 use std::io::{self,Write};
 
+use tokio::sync::mpsc;
+use crate::raft::RaftNode;
+
 use anyhow::Result;
 
 pub mod types;
 
 pub mod network;
+
+pub mod raft;
 
 use crate::types::{RaftMessage,RequestVoteArgs};
 
@@ -25,13 +30,25 @@ async fn main() -> Result<()>{
     }
 
     let my_port:u16 =args[1].parse()?;
+    
+    let (tx, rx) = mpsc::channel(100);
 
     // strating the server 
     tokio::spawn(async move{
-        if let Err(e)= start_server(my_port).await{
+        if let Err(e)= start_server(my_port,tx).await{
             eprintln!("the server crashed {:?}",e);
         }
     });
+
+
+
+    let mut node = RaftNode::new(my_port as u64, rx);
+    
+    // Spawn the Brain's infinite loop in the background so it can start reading mail
+    tokio::spawn(async move {
+        node.run().await;
+    });
+
     // over here we are giving time for the server to bind that port 
 
     tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
